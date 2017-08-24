@@ -1,0 +1,76 @@
+<p id="notice"><%= notice %></p>
+
+<h2 id="count">
+  
+</h2>
+
+<script type="text/javascript" charset="utf-8">
+
+$(document).ready(function () {
+  loadData();
+})
+
+var loadData = function() {
+  $.ajax({
+    type: 'GET',
+    contentType: 'application/json; charset=utf-8',
+    url: '/statuses',
+    dataType: 'json',
+    success: function(data) {
+      document.getElementById("count").innerHTML = data;
+      drawBarPlot(data);
+    },
+    error: function(data)  {
+      error();
+    }
+  });
+};
+
+function drawBarPlot(data) {
+  var d = [data];
+  d3.select('#plot')
+    .append('svg')
+    .data(d)
+    .style('width', function (d) {
+      return (d*2) + '%';
+    })
+    .style('height', 20)
+    .style('background', 'blue');
+}
+
+function updateBarPlot(data) {
+  var d = [data];
+  d3.select('svg')
+    .data(d)
+    .style('width', function (d) {
+      return (d*2) + '%';
+    });
+}
+
+
+$(function(){
+  var socket = io.connect('http://10.18.82.75:3001/');
+
+  socket.on('message', function (data) {
+    data = JSON.parse(data);
+    console.log(data);
+    $('#count').html(data);
+    updateBarPlot(data);
+  });
+});
+</script>
+
+<style>
+  #deer{
+    height: 10px;
+    background-color: blue;
+    border-bottom: 1px solid white;
+  }
+</style>
+
+<%= link_to 'New Status', new_status_path %>
+
+<br>
+<br>
+
+<div id="plot"></div>
